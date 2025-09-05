@@ -5,6 +5,7 @@ from Problem_4.chip_replacement import ChipPlacement
 
 
 def main():
+    # Problem 1 Example
     coords = [
         (0, 0),
         (30, 0),
@@ -38,7 +39,7 @@ def main():
     r.solve()
 
     # Problem 3 Example
-    board = "_X__0X__0".replace("0", "O")  # given board as string of 9
+    board = "_X__0X__0".replace("0", "O")
     ttt = TicTacToe(board)
     ttt.solve()
 
