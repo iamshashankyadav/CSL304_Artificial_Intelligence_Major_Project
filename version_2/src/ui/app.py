@@ -15,7 +15,7 @@ from core.word_list import WordList
 from core.game_engine import WordleGame
 from solvers.solver_factory import SolverFactory
 from utils.config_loader import ConfigLoader
-from utils. import PerformanceMetrics
+from utils.metrics import PerformanceMetrics
 from ui.components.game_board import render_game_board, render_keyboard
 from ui.components.solver_selector import render_solver_selector, render_solver_settings
 from ui.components.stats_panel import render_statistics, render_solver_info
