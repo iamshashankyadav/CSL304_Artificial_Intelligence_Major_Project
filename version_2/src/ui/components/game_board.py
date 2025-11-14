@@ -4,7 +4,7 @@ Wordle game board component.
 
 import streamlit as st
 from typing import List, Tuple
-from ...core.feedback import Feedback
+from core.feedback import Feedback, LetterStatus
 
 
 def render_game_board(
@@ -103,7 +103,6 @@ def render_keyboard(guesses: List[str], feedbacks: List[Feedback]):
         guesses: List of guesses made
         feedbacks: List of feedback for each guess
     """
-    from ...core.feedback import LetterStatus
 
     # Track letter status
     letter_status = {}

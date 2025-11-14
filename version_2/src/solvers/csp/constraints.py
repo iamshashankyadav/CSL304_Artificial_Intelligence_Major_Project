@@ -3,7 +3,7 @@ Constraint definitions for CSP solver.
 """
 
 from typing import Set, List, Dict
-from ...core.feedback import Feedback, LetterStatus
+from core.feedback import Feedback, LetterStatus
 
 
 class Constraint:

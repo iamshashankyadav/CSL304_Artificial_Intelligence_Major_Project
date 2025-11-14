@@ -3,9 +3,9 @@ Bayesian/Probabilistic solver using information theory.
 """
 
 from typing import List, Dict, Set
-from ..base_solver import BaseSolver
-from ...core.feedback import Feedback, LetterStatus
-from ...core.word_list import WordList
+from solvers.base_solver import BaseSolver
+from core.feedback import Feedback, LetterStatus
+from core.word_list import WordList
 import math
 from collections import Counter
 import logging

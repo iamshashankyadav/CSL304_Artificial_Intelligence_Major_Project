@@ -4,7 +4,7 @@ Wordle environment for reinforcement learning.
 
 import numpy as np
 from typing import Tuple, List
-from ...core.feedback import Feedback, LetterStatus
+from core.feedback import Feedback, LetterStatus
 
 
 class WordleEnvironment:

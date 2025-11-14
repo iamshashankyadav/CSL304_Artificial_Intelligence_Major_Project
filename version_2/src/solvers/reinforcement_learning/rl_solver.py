@@ -3,9 +3,9 @@ Reinforcement Learning solver for Wordle.
 """
 
 from typing import List, Dict
-from ..base_solver import BaseSolver
-from ...core.feedback import Feedback
-from ...core.word_list import WordList
+from solvers.base_solver import BaseSolver
+from core.feedback import Feedback
+from core.word_list import WordList
 import numpy as np
 import logging
 
@@ -114,7 +114,7 @@ class RLSolver(BaseSolver):
 
     def _update_preferences(self, guess: str, feedback: Feedback) -> None:
         """Update position preferences based on feedback (simple learning)."""
-        from ...core.feedback import LetterStatus
+        from core.feedback import LetterStatus
 
         learning_rate = 0.1
 

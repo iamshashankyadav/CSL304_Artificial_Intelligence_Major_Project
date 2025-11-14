@@ -4,8 +4,8 @@ Abstract base class for all Wordle solvers.
 
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
-from ..core.feedback import Feedback
-from ..core.word_list import WordList
+from core.feedback import Feedback
+from core.word_list import WordList
 import logging
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class BaseSolver(ABC):
         Returns:
             True if word is consistent with feedback
         """
-        from ..core.feedback import LetterStatus, Feedback as FeedbackClass
+        from core.feedback import LetterStatus, Feedback as FeedbackClass
 
         # Generate what the feedback would be for this word
         test_feedback = FeedbackClass(guess, word)

@@ -3,7 +3,7 @@ Solver selection component.
 """
 
 import streamlit as st
-from ...solvers.solver_factory import SolverFactory
+from solvers.solver_factory import SolverFactory
 
 
 def render_solver_selector() -> str:

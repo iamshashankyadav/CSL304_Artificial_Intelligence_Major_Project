@@ -3,13 +3,13 @@ Factory for creating solver instances.
 """
 
 from typing import Dict, Type
-from .base_solver import BaseSolver
-from .csp.csp_solver import CSPSolver
-from .knowledge_based.kb_solver import KnowledgeBasedSolver
-from .bayesian.bayesian_solver import BayesianSolver
-from .reinforcement_learning.rl_solver import RLSolver
-from .genetic.genetic_solver import GeneticSolver
-from ..core.word_list import WordList
+from solvers.base_solver import BaseSolver
+from solvers.csp.csp_solver import CSPSolver
+from solvers.knowledge_based.kb_solver import KnowledgeBasedSolver
+from solvers.bayesian.bayesian_solver import BayesianSolver
+from solvers.reinforcement_learning.rl_solver import RLSolver
+from solvers.genetic.genetic_solver import GeneticSolver
+from core.word_list import WordList
 
 
 class SolverFactory:

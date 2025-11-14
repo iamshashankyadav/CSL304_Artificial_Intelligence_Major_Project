@@ -3,9 +3,9 @@ Genetic Algorithm solver for Wordle.
 """
 
 from typing import List, Set, Tuple, Dict
-from ..base_solver import BaseSolver
-from ...core.feedback import Feedback, LetterStatus
-from ...core.word_list import WordList
+from solvers.base_solver import BaseSolver
+from core.feedback import Feedback, LetterStatus
+from core.word_list import WordList
 import random
 import logging
 from collections import Counter

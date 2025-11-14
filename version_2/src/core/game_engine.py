@@ -3,9 +3,9 @@ Wordle game engine implementation.
 """
 
 from typing import List, Optional, Tuple
-from .feedback import Feedback, LetterStatus
-from .validator import Validator
-from .word_list import WordList
+from core.feedback import Feedback, LetterStatus
+from core.validator import Validator
+from core.word_list import WordList
 import random
 import logging
 

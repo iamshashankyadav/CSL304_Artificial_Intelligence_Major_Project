@@ -3,10 +3,10 @@ Constraint Satisfaction Problem solver for Wordle.
 """
 
 from typing import List, Set
-from ..base_solver import BaseSolver
-from .constraints import ConstraintSet
-from ...core.feedback import Feedback
-from ...core.word_list import WordList
+from solvers.base_solver import BaseSolver
+from solvers.csp.constraints import ConstraintSet
+from core.feedback import Feedback
+from core.word_list import WordList
 import logging
 from collections import Counter
 
