@@ -1,0 +1,62 @@
+# Game Configuration
+game:
+  max_attempts: 6
+  word_length: 5
+  word_list: "data/words/valid_words.txt"
+  answer_list: "data/words/common_words.txt"
+
+# Solver Configurations
+solvers:
+  csp:
+    use_arc_consistency: true
+    use_forward_checking: true
+    heuristic: "most_constrained"
+    
+  knowledge_based:
+    rule_priority: "frequency"
+    use_letter_frequency: true
+    position_weight: 0.7
+    
+  bayesian:
+    entropy_threshold: 0.5
+    use_information_gain: true
+    prior_type: "frequency"
+    smoothing_factor: 0.01
+    
+  reinforcement_learning:
+    model_path: "data/models/rl_checkpoint.pt"
+    algorithm: "dqn"  # dqn or q_learning
+    epsilon: 0.1
+    epsilon_decay: 0.995
+    epsilon_min: 0.01
+    learning_rate: 0.001
+    gamma: 0.99
+    batch_size: 32
+    memory_size: 10000
+    
+  genetic:
+    population_size: 100
+    generations: 50
+    mutation_rate: 0.01
+    crossover_rate: 0.7
+    elite_size: 10
+    tournament_size: 5
+
+# UI Configuration
+ui:
+  theme: "dark"
+  show_statistics: true
+  show_visualization: true
+  animation_speed: 0.3
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/wordle_solver.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Performance
+performance:
+  enable_caching: true
+  parallel_processing: false
+  max_workers: 4

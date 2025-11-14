@@ -1,0 +1,12 @@
+# 9. Setup data
+mkdir -p data/words data/models data/benchmarks logs
+python scripts/setup_data.py
+
+# 10. Install package
+pip install -e .
+
+# 11. Run tests
+pytest
+
+# 12. Start the app
+streamlit run src/ui/app.py
