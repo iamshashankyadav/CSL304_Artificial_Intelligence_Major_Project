@@ -1,5 +1,3 @@
-# 9. Setup data
-mkdir -p data/words data/models data/benchmarks logs
 python scripts/setup_data.py
 
 # 10. Install package
