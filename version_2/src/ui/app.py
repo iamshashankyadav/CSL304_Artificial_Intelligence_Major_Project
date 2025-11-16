@@ -6,6 +6,8 @@ import streamlit as st
 import sys
 import os
 from pathlib import Path
+import logging
+import time
 
 # Add src to path
 src_path = Path(__file__).parent.parent
@@ -19,8 +21,10 @@ from utils.metrics import PerformanceMetrics
 from ui.components.game_board import render_game_board, render_keyboard
 from ui.components.solver_selector import render_solver_selector, render_solver_settings
 from ui.components.stats_panel import render_statistics, render_solver_info
-import time
 
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    logging.basicConfig(level=logging.INFO)
 
 # Page configuration
 st.set_page_config(
@@ -30,7 +34,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom CSS
 st.markdown(
     """
 <style>
@@ -67,22 +70,17 @@ st.markdown(
 def initialize_session_state():
     """Initialize Streamlit session state."""
     if "initialized" not in st.session_state:
-        # Load configuration
         config = ConfigLoader()
 
-        # Initialize word list
         word_list = WordList(
             valid_words_path="data/words/valid_words.txt",
             common_words_path="data/words/common_words.txt",
         )
 
-        # Initialize game
         game = WordleGame(word_list, max_attempts=6)
 
-        # Initialize metrics
         metrics = PerformanceMetrics()
 
-        # Store in session state
         st.session_state.config = config
         st.session_state.word_list = word_list
         st.session_state.game = game
@@ -95,18 +93,29 @@ def initialize_session_state():
 
 def start_new_game(solver_type: str, solver_config: dict, target_word: str = None):
     """Start a new game."""
-    # Create solver
     solver = SolverFactory.create(
         solver_type, st.session_state.word_list, solver_config
     )
     solver.reset()
 
-    # Start game
     game_state = st.session_state.game.start_new_game(target_word)
 
     st.session_state.solver = solver
     st.session_state.game_state = game_state
     st.session_state.start_time = time.time()
+
+
+def _fallback_guess():
+    """Return a safe fallback guess (prefer common words, else any valid)."""
+    wl = st.session_state.word_list
+    commons = list(wl.get_common_words() or [])
+    valids = list(wl.get_valid_words() or [])
+    if commons:
+        return commons[0]
+    if valids:
+        return valids[0]
+    # last resort
+    return "raise"
 
 
 def make_solver_guess():
@@ -117,17 +126,67 @@ def make_solver_guess():
     if st.session_state.game_state.is_over:
         return
 
-    # Get next guess from solver
-    guess = st.session_state.solver.get_next_guess()
+    try:
+        guess = st.session_state.solver.get_next_guess()
+    except Exception as ex:
+        logger.exception("Solver.get_next_guess() raised an exception:")
+        st.error("AI solver failed to produce a guess; using fallback.")
+        guess = _fallback_guess()
 
-    # Make guess in game
-    success, feedback, error = st.session_state.game.make_guess(guess)
+    if guess is None or not isinstance(guess, str) or len(guess) == 0:
+        logger.warning("Solver returned invalid guess: %r. Using fallback.", guess)
+        guess = _fallback_guess()
+
+    # Ensure guess is a valid 5-letter word known to the word list if possible
+    if hasattr(st.session_state.word_list, "is_valid_word"):
+        try:
+            if not st.session_state.word_list.is_valid_word(guess):
+                logger.warning(
+                    "Guess '%s' not in valid word list; using fallback.", guess
+                )
+                guess = _fallback_guess()
+        except Exception:
+            # If method fails for some reason, don't block execution
+            logger.exception(
+                "Error while validating guess with word_list.is_valid_word"
+            )
+
+    try:
+        success, feedback, error = st.session_state.game.make_guess(guess)
+    except Exception:
+        logger.exception("game.make_guess raised an exception with guess %r", guess)
+        st.error("Game engine failed to accept the guess.")
+        return
+
+    if error:
+        # If the game returned an error (e.g., invalid word), show it and try a fallback once
+        st.warning(f"Game rejected guess '{guess}': {error}")
+        fallback = _fallback_guess()
+        if fallback != guess:
+            try:
+                success, feedback, error = st.session_state.game.make_guess(fallback)
+            except Exception:
+                logger.exception(
+                    "game.make_guess raised an exception with fallback %r", fallback
+                )
+                return
+            if not error:
+                guess = fallback
+            else:
+                logger.error("Fallback guess also rejected: %r", error)
+                return
+        else:
+            return
 
     if success:
-        # Update solver
-        st.session_state.solver.update_state(guess, feedback)
+        try:
+            st.session_state.solver.update_state(guess, feedback)
+        except Exception:
+            logger.exception(
+                "solver.update_state raised an exception for guess %r", guess
+            )
+            # continue — we still want to update UI
 
-        # Check if game is over
         if st.session_state.game_state.is_over:
             elapsed_time = time.time() - st.session_state.start_time
             st.session_state.metrics.add_game(
@@ -141,7 +200,6 @@ def main():
     """Main application."""
     initialize_session_state()
 
-    # Header
     st.markdown(
         '<div class="main-header">🎮 AI Wordle Solver</div>', unsafe_allow_html=True
     )
@@ -150,18 +208,14 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # Sidebar - Solver selection
     solver_type = render_solver_selector()
     solver_config = render_solver_settings(solver_type)
 
-    # Sidebar - Statistics
     render_statistics(st.session_state.metrics.get_summary())
 
-    # Main area
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
-        # Game controls
         col_a, col_b, col_c = st.columns(3)
 
         with col_a:
@@ -178,7 +232,6 @@ def main():
             auto_play = st.checkbox("⚡ Auto Play", value=st.session_state.auto_play)
             st.session_state.auto_play = auto_play
 
-        # Custom word input
         with st.expander("🎯 Custom Target Word"):
             custom_word = st.text_input(
                 "Enter a 5-letter word (optional)", max_chars=5
@@ -189,7 +242,6 @@ def main():
 
         st.divider()
 
-        # Game board
         if st.session_state.game_state:
             render_game_board(
                 st.session_state.game_state.guesses,
@@ -197,7 +249,6 @@ def main():
                 st.session_state.game.max_attempts,
             )
 
-            # Game status
             if st.session_state.game_state.is_over:
                 if st.session_state.game_state.is_won:
                     st.success(
@@ -214,26 +265,26 @@ def main():
                     f"of {st.session_state.game.max_attempts}"
                 )
 
-            # Keyboard
             render_keyboard(
                 st.session_state.game_state.guesses,
                 st.session_state.game_state.feedbacks,
             )
 
-            # Solver info
             if st.session_state.solver:
-                render_solver_info(st.session_state.solver.get_statistics())
+                try:
+                    render_solver_info(st.session_state.solver.get_statistics())
+                except Exception:
+                    logger.exception("render_solver_info failed")
 
         else:
             st.info("👆 Click 'New Game' to start!")
 
-    # Auto-play logic
     if (
         st.session_state.auto_play
         and st.session_state.game_state
         and not st.session_state.game_state.is_over
     ):
-        time.sleep(0.5)  # Small delay for visualization
+        time.sleep(0.5)
         make_solver_guess()
         st.rerun()
 
