@@ -79,8 +79,24 @@ class CSPSolver(BaseSolver):
 
             scores[word] = score
 
+        # Sort by score
+        sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        
+        # Update candidates for UI
+        self.candidates = [
+            {"word": word, "score": f"{score:.0f}"}
+            for word, score in sorted_words[:5]
+        ]
+        
+        self.selection_info = {
+            "method": "CSP with Heuristics",
+            "valid_words": len(valid_words),
+            "constraints_active": self.constraints.constraint_count() if hasattr(self.constraints, 'constraint_count') else 0,
+            "total_candidates": len(self.possible_words),
+        }
+
         # Return word with highest score
-        best_word = max(scores.items(), key=lambda x: x[1])[0]
+        best_word = sorted_words[0][0]
         return best_word
 
     def _get_fallback_guess(self) -> str:

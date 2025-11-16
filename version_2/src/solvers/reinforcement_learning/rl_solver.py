@@ -133,8 +133,25 @@ class RLSolver(BaseSolver):
             logger.warning("No scores computed in _select_best_action; using fallback.")
             return self._fallback_guess()
 
+        # Sort by score
+        sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        
+        # Update candidates for UI
+        self.candidates = [
+            {"word": word, "score": f"{score:.2f}"}
+            for word, score in sorted_scores[:5]
+        ]
+        
+        self.selection_info = {
+            "method": "Reinforcement Learning",
+            "epsilon": self.epsilon,
+            "exploration_mode": np.random.random() < self.epsilon,
+            "candidates_evaluated": len(scores),
+            "total_remaining": len(self.possible_words),
+        }
+
         # Return highest scoring word
-        return max(scores.items(), key=lambda x: x[1])[0]
+        return sorted_scores[0][0]
 
     def _evaluate_word(self, word: str) -> float:
         """Evaluate a word using learned preferences."""

@@ -340,18 +340,47 @@ class GeneticSolver(BaseSolver):
         return self._fallback_guess()
 
     def _get_best_individual(self) -> str:
-        """Get best individual from current population in a safe way."""
+        """Get best individual from current population (safe + UI enabled)."""
+
+        # Safe check — if population is empty
         if not self.population:
             return self._fallback_guess()
+
         fitness_scores = []
+
+        # Safely calculate fitness for each word
         for word in self.population:
             try:
-                fitness_scores.append((word, self._fitness(word)))
+                score = self._fitness(word)
+                fitness_scores.append((word, score))
             except Exception:
                 logger.exception("Fitness error for %s", word)
+
+        # If all fitness evaluations failed
         if not fitness_scores:
             return self._fallback_guess()
-        return max(fitness_scores, key=lambda x: x[1])[0]
+
+        # Sort by fitness (highest first)
+        fitness_scores.sort(key=lambda x: x[1], reverse=True)
+
+        # Update UI candidate list (top 5)
+        self.candidates = [
+            {"word": word, "score": f"{score:.2f}"}
+            for word, score in fitness_scores[:5]
+        ]
+
+        # Metadata for the UI
+        self.selection_info = {
+            "method": "Genetic Algorithm",
+            "population_size": len(self.population),
+            "generation": self.generation,
+            "total_candidates": len(self.possible_words),
+        }
+
+        # Best word is the first after sorting
+        best_word = fitness_scores[0][0]
+        return best_word
+
 
     def update_state(self, guess: str, feedback: Feedback) -> None:
         """Update solver state based on feedback and reset population appropriately."""
