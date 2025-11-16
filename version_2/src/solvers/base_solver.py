@@ -27,6 +27,8 @@ class BaseSolver(ABC):
         self.possible_words = set(word_list.get_common_words())
         self.guess_history: List[str] = []
         self.feedback_history: List[Feedback] = []
+        self.candidates: List[Dict[str, Any]] = []  # Top candidates with scores
+        self.selection_info: Dict[str, Any] = {}  # Additional selection info
 
     @abstractmethod
     def get_next_guess(self) -> str:
@@ -54,6 +56,8 @@ class BaseSolver(ABC):
         self.possible_words = set(self.word_list.get_common_words())
         self.guess_history = []
         self.feedback_history = []
+        self.candidates = []
+        self.selection_info = {}
         logger.info(f"{self.__class__.__name__} reset")
 
     def get_statistics(self) -> Dict[str, Any]:
@@ -62,6 +66,8 @@ class BaseSolver(ABC):
             "guesses_made": len(self.guess_history),
             "remaining_words": len(self.possible_words),
             "algorithm": self.__class__.__name__,
+            "candidates": self.candidates,
+            "selection_info": self.selection_info,
         }
 
     def _filter_words_by_feedback(self, guess: str, feedback: Feedback) -> None:

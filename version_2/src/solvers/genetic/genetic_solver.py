@@ -189,7 +189,22 @@ class GeneticSolver(BaseSolver):
     def _get_best_individual(self) -> str:
         """Get best individual from current population."""
         fitness_scores = [(word, self._fitness(word)) for word in self.population]
-        best_word = max(fitness_scores, key=lambda x: x[1])[0]
+        fitness_scores.sort(key=lambda x: x[1], reverse=True)
+        
+        # Update candidates for UI display
+        self.candidates = [
+            {"word": word, "score": f"{score:.2f}"}
+            for word, score in fitness_scores[:5]
+        ]
+        
+        self.selection_info = {
+            "method": "Genetic Algorithm",
+            "population_size": len(self.population),
+            "generation": self.generation,
+            "total_candidates": len(self.possible_words),
+        }
+        
+        best_word = fitness_scores[0][0]
         return best_word
 
     def update_state(self, guess: str, feedback: Feedback) -> None:
