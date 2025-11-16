@@ -67,13 +67,30 @@ class BayesianSolver(BaseSolver):
 
         best_guess = None
         best_score = -float("inf")
+        scores = {}
 
         for guess in candidate_guesses:
             expected_info = self._calculate_expected_information(guess)
+            scores[guess] = expected_info
 
             if expected_info > best_score:
                 best_score = expected_info
                 best_guess = guess
+
+        # Update candidates for UI
+        sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        self.candidates = [
+            {"word": word, "score": f"{score:.4f}"}
+            for word, score in sorted_scores[:5]
+        ]
+        
+        entropy = self._calculate_entropy()
+        self.selection_info = {
+            "method": "Bayesian Information Theory",
+            "entropy": f"{entropy:.2f}",
+            "candidates_evaluated": len(scores),
+            "total_remaining": len(self.possible_words),
+        }
 
         return best_guess
 

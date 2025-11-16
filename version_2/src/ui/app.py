@@ -21,6 +21,8 @@ from utils.metrics import PerformanceMetrics
 from ui.components.game_board import render_game_board, render_keyboard
 from ui.components.solver_selector import render_solver_selector, render_solver_settings
 from ui.components.stats_panel import render_statistics, render_solver_info
+from ui.components.word_selection import render_word_selection, render_selection_progress
+import time
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -72,9 +74,15 @@ def initialize_session_state():
     if "initialized" not in st.session_state:
         config = ConfigLoader()
 
+        # Get the base path for data files
+        base_path = Path(__file__).parent.parent.parent
+        valid_words_path = base_path / "data" / "words" / "valid_words.txt"
+        common_words_path = base_path / "data" / "words" / "common_words.txt"
+
+        # Initialize word list
         word_list = WordList(
-            valid_words_path="data/words/valid_words.txt",
-            common_words_path="data/words/common_words.txt",
+            valid_words_path=str(valid_words_path),
+            common_words_path=str(common_words_path),
         )
 
         game = WordleGame(word_list, max_attempts=6)
@@ -88,6 +96,8 @@ def initialize_session_state():
         st.session_state.solver = None
         st.session_state.game_state = None
         st.session_state.auto_play = False
+        # Store history of all guesses with their results
+        st.session_state.guess_history = []
         st.session_state.initialized = True
 
 
@@ -103,6 +113,7 @@ def start_new_game(solver_type: str, solver_config: dict, target_word: str = Non
     st.session_state.solver = solver
     st.session_state.game_state = game_state
     st.session_state.start_time = time.time()
+    st.session_state.guess_history = []  # Reset history for new game
 
 
 def _fallback_guess():
@@ -119,7 +130,7 @@ def _fallback_guess():
 
 
 def make_solver_guess():
-    """Make a guess using the current solver."""
+    """Make a guess using the current solver and store results."""
     if st.session_state.solver is None or st.session_state.game_state is None:
         return
 
@@ -179,13 +190,30 @@ def make_solver_guess():
             return
 
     if success:
+        # Get solver stats BEFORE updating state
+        solver_stats = st.session_state.solver.get_statistics()
+
+        # Safely update solver state
         try:
             st.session_state.solver.update_state(guess, feedback)
         except Exception:
             logger.exception(
                 "solver.update_state raised an exception for guess %r", guess
             )
-            # continue — we still want to update UI
+            # continue — we still want to update UI even if solver had an error
+
+        # Store the result for UI display
+        guess_result = {
+            "attempt": st.session_state.game_state.attempts,
+            "guess": guess,
+            "feedback": feedback,
+            "remaining_words": len(st.session_state.solver.possible_words),
+            "candidates": solver_stats.get("candidates", []),
+            "selection_info": solver_stats.get("selection_info", {}),
+        }
+        st.session_state.guess_history.append(guess_result)
+
+        # Check if game is over
 
         if st.session_state.game_state.is_over:
             elapsed_time = time.time() - st.session_state.start_time
@@ -194,6 +222,7 @@ def make_solver_guess():
                 st.session_state.game_state.attempts,
                 elapsed_time,
             )
+
 
 
 def main():
@@ -270,15 +299,70 @@ def main():
                 st.session_state.game_state.feedbacks,
             )
 
+            # Divider before history
+            st.divider()
+
+            # Display all guess results history
+            if st.session_state.guess_history:
+                st.subheader("📋 Guess History")
+                
+                for result in st.session_state.guess_history:
+                    with st.expander(
+                        f"Attempt {result['attempt']}: {result['guess'].upper()} "
+                        f"({result['remaining_words']} words remaining)",
+                        expanded=(result['attempt'] == len(st.session_state.guess_history))
+                    ):
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.write(f"**Guessed Word:** {result['guess'].upper()}")
+                            st.write(f"**Remaining Candidates:** {result['remaining_words']}")
+
+                        with col2:
+                            selection_info = result.get("selection_info", {})
+                            if selection_info:
+                                st.write(f"**Algorithm:** {selection_info.get('method', 'N/A')}")
+                                if "entropy" in selection_info:
+                                    st.write(f"**Entropy:** {selection_info.get('entropy', 'N/A')}")
+
+                        # Show top candidates
+                        candidates = result.get("candidates", [])
+                        if candidates:
+                            st.write("**Top Candidates Considered:**")
+                            for i, cand in enumerate(candidates, 1):
+                                st.write(
+                                    f"{i}. {cand.get('word', '').upper()} "
+                                    f"(Score: {cand.get('score', 'N/A')})"
+                                )
+
+                st.divider()
+
+            # Current solver info
             if st.session_state.solver:
                 try:
-                    render_solver_info(st.session_state.solver.get_statistics())
+                    solver_stats = st.session_state.solver.get_statistics()
+
+                    # Show selection progress
+                    render_selection_progress(
+                        st.session_state.game_state.guesses,
+                        solver_stats.get("remaining_words", 0),
+                        len(st.session_state.word_list.get_common_words()),
+                    )
+
+                    st.divider()
+
+                    # Show general solver info
+                    render_solver_info(solver_stats)
+
                 except Exception:
                     logger.exception("render_solver_info failed")
+
 
         else:
             st.info("👆 Click 'New Game' to start!")
 
+
+    # Auto-play logic - store without rerun for speed
     if (
         st.session_state.auto_play
         and st.session_state.game_state

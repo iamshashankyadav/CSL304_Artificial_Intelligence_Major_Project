@@ -134,8 +134,23 @@ class KnowledgeBasedSolver(BaseSolver):
 
             scores[word] = score
 
+        # Sort and update candidates for UI
+        sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        self.candidates = [
+            {"word": word, "score": f"{score:.0f}"}
+            for word, score in sorted_scores[:5]
+        ]
+        
+        self.selection_info = {
+            "method": "Rule-Based Reasoning",
+            "confirmed_letters": len(self.confirmed_letters),
+            "present_letters": len(self.present_letters),
+            "candidates_evaluated": len(scores),
+            "total_remaining": len(self.possible_words),
+        }
+
         # Return highest scoring word
-        return max(scores.items(), key=lambda x: x[1])[0]
+        return sorted_scores[0][0]
 
     def _get_fallback_guess(self) -> str:
         """Fallback when no candidates found."""
