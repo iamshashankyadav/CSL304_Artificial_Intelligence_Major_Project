@@ -120,7 +120,7 @@ class GeneticSolver(BaseSolver):
             return 1.0
 
         # Check if word is consistent with all feedback
-        from ...core.feedback import Feedback as FeedbackClass
+        from core.feedback import Feedback as FeedbackClass
 
         for guess, feedback in zip(self.guess_history, self.feedback_history):
             test_feedback = FeedbackClass(guess, word)

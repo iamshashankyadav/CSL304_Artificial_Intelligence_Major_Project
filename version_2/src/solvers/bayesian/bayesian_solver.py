@@ -79,7 +79,7 @@ class BayesianSolver(BaseSolver):
 
     def _calculate_expected_information(self, guess: str) -> float:
         """Calculate expected information gain for a guess."""
-        from ...core.feedback import Feedback as FeedbackClass
+        from core.feedback import Feedback as FeedbackClass
 
         # Group possible answers by their feedback pattern
         pattern_groups: Dict[tuple, List[str]] = {}
@@ -140,7 +140,7 @@ class BayesianSolver(BaseSolver):
 
     def _bayesian_update(self, guess: str, feedback: Feedback) -> None:
         """Update probabilities using Bayes' rule."""
-        from ...core.feedback import Feedback as FeedbackClass
+        from core.feedback import Feedback as FeedbackClass
 
         # Keep only words consistent with feedback
         new_probabilities = {}
