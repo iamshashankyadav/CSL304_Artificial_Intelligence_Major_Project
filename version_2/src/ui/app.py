@@ -22,6 +22,7 @@ from ui.components.game_board import render_game_board, render_keyboard
 from ui.components.solver_selector import render_solver_selector, render_solver_settings
 from ui.components.stats_panel import render_statistics, render_solver_info
 from ui.components.word_selection import render_word_selection, render_selection_progress
+from ui.components.dashboard import render_dashboard
 import time
 
 logger = logging.getLogger(__name__)
@@ -241,6 +242,14 @@ def main():
     solver_config = render_solver_settings(solver_type)
 
     render_statistics(st.session_state.metrics.get_summary())
+
+    # Non-interactive comparison dashboard (dynamic)
+    try:
+        available = SolverFactory.get_available_solvers()
+        other_solver = next((s for s in available if s != solver_type), available[0] if available else solver_type)
+        render_dashboard(solver_type, other_solver, st.session_state.word_list)
+    except Exception:
+        logger.exception("render_dashboard failed")
 
     col1, col2, col3 = st.columns([1, 2, 1])
 
