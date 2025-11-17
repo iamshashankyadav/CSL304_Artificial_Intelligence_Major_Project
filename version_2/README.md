@@ -18,6 +18,7 @@ An advanced Wordle solver implementing **5 different AI algorithms** with a beau
 - **Modern UI:** Beautiful, responsive Streamlit interface
 - **Interactive Gameplay:** Watch AI solve in real-time or step through manually
 - **Performance Metrics:** Track win rates, average guesses, and solver efficiency
+- **Dashboards:** Comparison of algorithms on the basis of differentiation factors
 - **Configurable:** Adjust algorithm parameters on the fly
 - **Well-Tested:** Comprehensive test suite included
 
@@ -44,8 +45,8 @@ An advanced Wordle solver implementing **5 different AI algorithms** with a beau
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/yourusername/wordle-ai-solver.git
-cd wordle-ai-solver
+git clone https://github.com/ashutosh229/CSL304_Artificial_Intelligence_Major_Project.git
+cd CSL304_Artificial_Intelligence_Major_Project
 ```
 
 2. **Create a virtual environment:**
@@ -134,7 +135,7 @@ Evolutionary search approach:
 
 ## 📁 Project Structure
 ```
-wordle-ai-solver/
+CSL304_Major_Project/
 ├── src/
 │   ├── core/              # Game engine and logic
 │   ├── solvers/           # AI algorithm implementations
@@ -246,9 +247,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-Your Name - your.email@example.com
+Name - Ashutosh Kumar Jha 
+Email - [ashutoshj@iitbhilai.ac.in](mailto:ashutoshj@iitbhilai.ac.in)
+Personal Email - [akumarjha875@gmail.com](mailto:akumarjha875@gmail.com)
 
-Project Link: https://github.com/yourusername/wordle-ai-solver
+Project Link: [GitHub](https://github.com/ashutosh229/CSL304_Artificial_Intelligence_Major_Project)
 
 ---
 

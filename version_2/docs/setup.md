@@ -24,7 +24,7 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # 8. Create all source code files
-# - Copy all files from sections 2-11
+# - Copy all files froleam sections 2-11
 
 # 9. Setup data
 mkdir -p data/words data/models data/benchmarks logs
